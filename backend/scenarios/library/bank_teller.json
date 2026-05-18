@@ -1,0 +1,21 @@
+{
+  "id": "bank_teller",
+  "title": "Talking to a Bank Teller",
+  "description": "Practice visiting a bank branch to ask about your account, make a simple request, or get help with a transaction.",
+  "difficulty": "intermediate",
+  "context": "You are at a bank during business hours. You need help with your checking account — perhaps checking a balance, depositing a check, or asking about fees. The teller greets you at the counter.",
+  "opening_line": "Good afternoon! Welcome to First Community Bank. How can I help you today?",
+  "goal_state": [
+    "user has stated what they need help with",
+    "user has provided their name or account information when asked",
+    "user has asked at least one clarifying question or confirmed details",
+    "user has thanked the teller and ended the interaction politely"
+  ],
+  "success_criteria": "User completes a clear bank counter conversation about their account",
+  "rubric_weights": {
+    "task_completion": 0.4,
+    "communicative_appropriateness": 0.35,
+    "fluency": 0.15,
+    "vocabulary_range": 0.1
+  }
+}

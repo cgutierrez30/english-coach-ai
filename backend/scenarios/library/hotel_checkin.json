@@ -1,0 +1,21 @@
+{
+  "id": "hotel_checkin",
+  "title": "Checking Into a Hotel",
+  "description": "Practice checking in at a hotel front desk, confirming your reservation, and asking about amenities or checkout time.",
+  "difficulty": "beginner",
+  "context": "You have arrived at a hotel in the evening with a reservation. The front desk clerk will ask for your name and ID, then help you get your room key.",
+  "opening_line": "Good evening! Welcome to the Riverside Hotel. Do you have a reservation with us?",
+  "goal_state": [
+    "user has confirmed they have a reservation",
+    "user has provided their name when asked",
+    "user has asked at least one question about the stay, room, or hotel amenities",
+    "user has confirmed checkout time or key details before leaving the desk"
+  ],
+  "success_criteria": "User successfully completes a hotel check-in interaction",
+  "rubric_weights": {
+    "task_completion": 0.4,
+    "communicative_appropriateness": 0.3,
+    "fluency": 0.2,
+    "vocabulary_range": 0.1
+  }
+}

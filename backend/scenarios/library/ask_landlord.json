@@ -1,0 +1,22 @@
+{
+  "id": "ask_landlord",
+  "title": "Asking a Landlord About an Apartment",
+  "description": "Practice calling or meeting a landlord to ask about rent, utilities, move-in dates, and apartment features.",
+  "difficulty": "intermediate",
+  "context": "You saw a listing for a two-bedroom apartment and want to ask the landlord questions before scheduling a viewing. Be polite and clear about rent, deposit, and availability.",
+  "opening_line": "Hi, thanks for your interest in the Maple Street apartment. What would you like to know?",
+  "goal_state": [
+    "user has greeted the landlord and stated their interest",
+    "user has asked about rent or monthly cost",
+    "user has asked at least one question about the apartment or lease terms",
+    "user has asked about availability or a viewing",
+    "user has closed the conversation politely"
+  ],
+  "success_criteria": "User gathers key rental information and schedules or requests a viewing",
+  "rubric_weights": {
+    "task_completion": 0.4,
+    "communicative_appropriateness": 0.3,
+    "fluency": 0.2,
+    "vocabulary_range": 0.1
+  }
+}
