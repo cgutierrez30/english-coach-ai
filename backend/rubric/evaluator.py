@@ -4,11 +4,12 @@ import re
 import anthropic
 
 from config import settings
-from rubric.schema import STANDARD_DIMENSIONS, RubricDimension, RubricSchema
+from rubric.heuristic import score_all_dimensions
+from rubric.schema import STANDARD_DIMENSIONS, RubricSchema
 
 
 class RubricEvaluator:
-    """LLM-based rubric evaluator using Claude."""
+    """LLM-based rubric evaluator using Claude, with transcript heuristic fallback."""
 
     def __init__(self):
         self._client: anthropic.Anthropic | None = None
@@ -26,7 +27,7 @@ class RubricEvaluator:
         rubric = RubricSchema.empty(weights=weights)
 
         if not settings.anthropic_configured:
-            return self._heuristic_evaluate(conversation_history, rubric)
+            return self._heuristic_evaluate(conversation_history, rubric, scenario)
 
         history_text = self._format_history(conversation_history)
         dimension_specs = "\n".join(
@@ -70,7 +71,7 @@ Respond with ONLY valid JSON in this exact shape:
         except Exception:
             pass
 
-        return self._heuristic_evaluate(conversation_history, rubric)
+        return self._heuristic_evaluate(conversation_history, rubric, scenario)
 
     def _populate_from_json(self, data: dict, rubric: RubricSchema) -> RubricSchema:
         scores_by_name = {
@@ -84,26 +85,15 @@ Respond with ONLY valid JSON in this exact shape:
         return rubric
 
     def _heuristic_evaluate(
-        self, history: list[dict], rubric: RubricSchema
+        self,
+        history: list[dict],
+        rubric: RubricSchema,
+        scenario: dict,
     ) -> RubricSchema:
-        user_messages = [m for m in history if m.get("role") == "user"]
-        word_count = sum(len(m.get("content", "").split()) for m in user_messages)
-        turn_count = len(user_messages)
-
-        base = 2.0
-        if turn_count >= 3:
-            base += 0.5
-        if word_count >= 30:
-            base += 0.5
-        if word_count >= 60:
-            base += 0.5
-        base = min(5.0, base)
-
+        scores = score_all_dimensions(history, scenario)
         for dim in rubric.dimensions:
-            dim.score = base
-            dim.justification = (
-                "Heuristic score (no API key): based on participation length and turns."
-            )
+            if dim.name in scores:
+                dim.score, dim.justification = scores[dim.name]
         return rubric
 
     @staticmethod
