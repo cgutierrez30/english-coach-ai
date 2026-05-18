@@ -2,15 +2,16 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "./api/client";
 import ConversationView from "./components/ConversationView";
 import EvaluationReport from "./components/EvaluationReport";
+import LandingPage from "./components/LandingPage";
+import Navbar from "./components/Navbar";
 import ProgressDashboard from "./components/ProgressDashboard";
 import ScenarioSelector from "./components/ScenarioSelector";
+import { ChatSkeleton, ScenarioGridSkeleton } from "./components/ui/LoadingSkeleton";
 import { useSession } from "./hooks/useSession";
 import { useVoiceInput } from "./hooks/useVoiceInput";
 
-const TABS = ["practice", "progress"];
-
 export default function App() {
-  const [tab, setTab] = useState("practice");
+  const [tab, setTab] = useState("home");
   const [scenarios, setScenarios] = useState([]);
   const [scenariosLoading, setScenariosLoading] = useState(true);
   const [progress, setProgress] = useState(null);
@@ -45,7 +46,10 @@ export default function App() {
   }, []);
 
   const loadProgress = useCallback(async () => {
-    if (!userId) return;
+    if (!userId) {
+      setProgress(null);
+      return;
+    }
     setProgressLoading(true);
     try {
       const data = await api.getProgress(userId);
@@ -61,6 +65,13 @@ export default function App() {
     if (tab === "progress") loadProgress();
   }, [tab, loadProgress]);
 
+  const handleNavigate = (nextTab) => {
+    setTab(nextTab);
+    if (nextTab !== "practice") {
+      reset();
+    }
+  };
+
   const handleSelectScenario = async (scenarioId) => {
     await startSession(scenarioId);
   };
@@ -72,80 +83,85 @@ export default function App() {
 
   const handleBack = () => {
     reset();
+    setTab("practice");
     loadProgress();
   };
 
-  const view = evaluation
+  const practiceView = evaluation
     ? "evaluation"
     : session
       ? "conversation"
       : "select";
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-brand-50">
-      <header className="border-b border-slate-200 bg-white/80 backdrop-blur sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-brand-900">English Coach AI</h1>
-          <nav className="flex gap-2">
-            {TABS.map((t) => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => setTab(t)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize ${
-                  tab === t
-                    ? "bg-brand-600 text-white"
-                    : "text-slate-600 hover:bg-slate-100"
-                }`}
-              >
-                {t}
-              </button>
-            ))}
-          </nav>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-indigo-50/30">
+      <Navbar activeTab={tab} onNavigate={handleNavigate} />
 
-      <main className="max-w-5xl mx-auto px-4 py-8">
+      <main className="max-w-5xl mx-auto px-4 py-6 sm:py-8 page-enter">
         {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+          <div
+            role="alert"
+            className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm"
+          >
             {error}
           </div>
         )}
 
-        {tab === "progress" ? (
-          <ProgressDashboard progress={progress} loading={progressLoading} />
-        ) : (
-          <>
-            {view === "select" && (
-              <>
-                <p className="text-slate-600 mb-6 text-center max-w-xl mx-auto">
-                  Choose a real-life scenario and practice English through natural
-                  conversation. Get rubric-based feedback when you finish.
-                </p>
-                <ScenarioSelector
-                  scenarios={scenarios}
-                  onSelect={handleSelectScenario}
-                  loading={scenariosLoading || loading}
-                />
-              </>
+        {tab === "home" && (
+          <LandingPage onStart={() => setTab("practice")} />
+        )}
+
+        {tab === "progress" && (
+          <div key="progress">
+            <h2 className="text-2xl font-bold text-slate-900 mb-6">Your Progress</h2>
+            <ProgressDashboard progress={progress} loading={progressLoading} />
+          </div>
+        )}
+
+        {tab === "practice" && (
+          <div key="practice">
+            {practiceView === "select" && (
+              <div className="animate-fade-in">
+                <div className="mb-6 text-center sm:text-left">
+                  <h2 className="text-2xl font-bold text-slate-900">Choose a Scenario</h2>
+                  <p className="text-slate-600 mt-1 text-sm sm:text-base">
+                    Pick a real-life situation and start practicing.
+                  </p>
+                </div>
+                {scenariosLoading ? (
+                  <ScenarioGridSkeleton />
+                ) : (
+                  <ScenarioSelector
+                    scenarios={scenarios}
+                    onSelect={handleSelectScenario}
+                    loading={loading}
+                  />
+                )}
+              </div>
             )}
 
-            {view === "conversation" && (
-              <ConversationView
-                scenario={session.scenario}
-                conversation={conversation}
-                goalsCompleted={goalsCompleted}
-                loading={loading}
-                onSend={sendMessage}
-                onEnd={handleEnd}
-                voice={voice}
-              />
+            {practiceView === "conversation" && (
+              <div key="chat" className="animate-fade-in">
+                {loading && conversation.length <= 1 ? (
+                  <ChatSkeleton />
+                ) : (
+                  <ConversationView
+                    scenario={session.scenario}
+                    conversation={conversation}
+                    goalsCompleted={goalsCompleted}
+                    loading={loading}
+                    onSend={sendMessage}
+                    onEnd={handleEnd}
+                    voice={voice}
+                  />
+                )}
+              </div>
             )}
 
-            {view === "evaluation" && (
+            {practiceView === "evaluation" && (
               <EvaluationReport evaluation={evaluation} onBack={handleBack} />
             )}
-          </>
+          </div>
         )}
       </main>
     </div>
