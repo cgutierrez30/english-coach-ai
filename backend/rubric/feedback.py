@@ -4,7 +4,15 @@ import re
 import anthropic
 
 from config import settings
+from rubric.heuristic import analyze_transcript
 from rubric.schema import RubricSchema
+
+DIMENSION_LABELS = {
+    "task_completion": "task completion",
+    "communicative_appropriateness": "communicative tone",
+    "fluency": "fluency",
+    "vocabulary_range": "vocabulary",
+}
 
 
 class FeedbackGenerator:
@@ -82,39 +90,52 @@ Respond with ONLY valid JSON:
             if m.get("role") == "user" and m.get("content")
         ]
         example_quote = user_lines[0][:120] if user_lines else "your responses"
+        analysis = analyze_transcript(
+            conversation_history,
+            {"goal_state": []},
+        )
 
         strengths = []
         improvements = []
-        if strongest and strongest.score >= 3:
+        if strongest and strongest.score >= 3.5:
+            label = DIMENSION_LABELS.get(strongest.name, strongest.name)
             strengths.append(
-                f"Strong performance in {strongest.name.replace('_', ' ')} "
-                f"(score {strongest.score}/5)."
+                f"Strongest area: {label} ({strongest.score}/5). {strongest.justification}"
             )
-        if weakest and weakest.score < 4:
+        if weakest and weakest.score < strongest.score if strongest else True:
+            label = DIMENSION_LABELS.get(weakest.name, weakest.name)
             improvements.append(
-                f"Focus on improving {weakest.name.replace('_', ' ')} "
-                f"(score {weakest.score}/5)."
+                f"Focus next on {label} ({weakest.score}/5). {weakest.justification}"
+            )
+        if analysis.polite_hits:
+            strengths.append(
+                f"You used polite language ({', '.join(sorted(set(analysis.polite_hits))[:3])})."
+            )
+        if analysis.filler_count > 2:
+            improvements.append(
+                f"Try reducing filler words — we counted about {analysis.filler_count} in your speech."
             )
         if not strengths:
-            strengths.append("You completed the conversation and practiced real-world English.")
+            strengths.append("You completed a full practice conversation in English.")
         if not improvements:
-            improvements.append("Try using more varied vocabulary in your next session.")
+            improvements.append("Push for longer, more detailed responses next session.")
 
         return {
             "summary": (
-                f"Overall score: {rubric.overall_score}/5. "
-                "You engaged in a scenario-based conversation and received rubric-based feedback."
+                f"You scored {rubric.overall_score}/5 overall. "
+                f"Scores were calculated from your transcript: "
+                f"vocabulary diversity, politeness, goal coverage, and fluency."
             ),
-            "strengths": strengths,
-            "areas_for_improvement": improvements,
+            "strengths": strengths[:3],
+            "areas_for_improvement": improvements[:3],
             "specific_examples": [
                 {
                     "quote": example_quote,
-                    "comment": "This shows your approach to the task; aim for fuller, more precise phrasing next time.",
+                    "comment": "This line represents your speaking style in this session — build on what worked here.",
                 }
             ],
             "next_steps": [
-                "Repeat this scenario and try to use two new phrases you did not use before.",
-                "Practice the lowest-scoring rubric dimension with a short self-recording.",
+                f"Practice again and aim to raise your lowest dimension ({DIMENSION_LABELS.get(weakest.name, 'weak area') if weakest else 'fluency'}).",
+                "Prepare two new phrases for the scenario before you start the next session.",
             ],
         }
