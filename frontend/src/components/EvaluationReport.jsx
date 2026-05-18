@@ -1,3 +1,10 @@
+import {
+  formatJustification,
+  getDimensionAccent,
+  getOverallScoreStyle,
+  getScoreStyle,
+} from "../utils/scoreUtils";
+
 const DIMENSION_LABELS = {
   task_completion: "Task Completion",
   communicative_appropriateness: "Communicative Appropriateness",
@@ -5,54 +12,86 @@ const DIMENSION_LABELS = {
   vocabulary_range: "Vocabulary Range",
 };
 
+function ScoreBar({ score, maxScore, barClass }) {
+  const pct = Math.min(100, Math.max(0, (score / maxScore) * 100));
+  return (
+    <div className="h-2 w-full rounded-full bg-slate-200 overflow-hidden mt-3">
+      <div
+        className={`h-full rounded-full transition-all duration-700 ease-out ${barClass}`}
+        style={{ width: `${pct}%` }}
+      />
+    </div>
+  );
+}
+
+function DimensionCard({ dim }) {
+  const style = getScoreStyle(dim.score, dim.max_score);
+  const accent = getDimensionAccent(dim.name);
+  const justification = formatJustification(dim.justification);
+
+  return (
+    <div
+      className={`p-4 rounded-xl border border-slate-200 border-l-4 ${accent.border} ${accent.bg} shadow-sm`}
+    >
+      <div className="flex justify-between items-start gap-3">
+        <h4 className={`font-semibold text-sm sm:text-base ${accent.label}`}>
+          {DIMENSION_LABELS[dim.name] || dim.name}
+        </h4>
+        <span
+          className={`shrink-0 px-2.5 py-1 rounded-full text-xs font-bold shadow-sm ${style.badge}`}
+        >
+          {dim.score}/{dim.max_score}
+        </span>
+      </div>
+      <ScoreBar score={dim.score} maxScore={dim.max_score} barClass={style.bar} />
+      <p className="text-sm text-slate-600 mt-3 leading-relaxed">{justification}</p>
+    </div>
+  );
+}
+
 export default function EvaluationReport({ evaluation, onBack }) {
   if (!evaluation) return null;
 
   const { rubric, feedback, overall_score } = evaluation;
+  const overallStyle = getOverallScoreStyle(overall_score);
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <h2 className="text-2xl font-bold text-slate-900">Session Evaluation</h2>
         <button
           type="button"
           onClick={onBack}
-          className="text-sm text-brand-600 hover:underline"
+          className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
         >
-          Practice another scenario
+          Practice another scenario →
         </button>
       </div>
 
-      <div className="p-6 bg-white rounded-xl border border-slate-200 shadow-sm text-center">
-        <p className="text-sm text-slate-500 uppercase tracking-wide">Overall Score</p>
-        <p className="text-5xl font-bold text-brand-700 mt-1">{overall_score}</p>
+      <div
+        className={`p-6 bg-white rounded-2xl border border-slate-200 shadow-sm text-center ring-4 ${overallStyle.ring}`}
+      >
+        <p className="text-sm text-slate-500 uppercase tracking-wide font-medium">
+          Overall Score
+        </p>
+        <p className="text-5xl font-bold text-indigo-700 mt-1">{overall_score}</p>
         <p className="text-slate-500 text-sm">out of 5</p>
+        <div className="max-w-xs mx-auto mt-4">
+          <ScoreBar score={overall_score} maxScore={5} barClass={overallStyle.bar} />
+        </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2">
         {rubric?.dimensions?.map((dim) => (
-          <div
-            key={dim.name}
-            className="p-4 bg-white rounded-lg border border-slate-200"
-          >
-            <div className="flex justify-between items-center mb-1">
-              <span className="font-medium text-slate-800">
-                {DIMENSION_LABELS[dim.name] || dim.name}
-              </span>
-              <span className="text-brand-700 font-semibold">
-                {dim.score}/{dim.max_score}
-              </span>
-            </div>
-            <p className="text-sm text-slate-600">{dim.justification}</p>
-          </div>
+          <DimensionCard key={dim.name} dim={dim} />
         ))}
       </div>
 
       {feedback && (
         <>
-          <section className="p-5 bg-white rounded-xl border border-slate-200">
+          <section className="p-5 bg-white rounded-xl border border-slate-200 shadow-sm">
             <h3 className="font-semibold text-slate-900 mb-2">Summary</h3>
-            <p className="text-slate-700">{feedback.summary}</p>
+            <p className="text-slate-700 leading-relaxed">{feedback.summary}</p>
           </section>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -80,7 +119,7 @@ export default function EvaluationReport({ evaluation, onBack }) {
               <h3 className="font-semibold text-slate-900 mb-3">Examples</h3>
               <div className="space-y-3">
                 {feedback.specific_examples.map((ex, i) => (
-                  <blockquote key={i} className="border-l-4 border-brand-300 pl-4">
+                  <blockquote key={i} className="border-l-4 border-indigo-300 pl-4">
                     <p className="text-slate-700 italic">&ldquo;{ex.quote}&rdquo;</p>
                     <p className="text-sm text-slate-600 mt-1">{ex.comment}</p>
                   </blockquote>
@@ -89,9 +128,9 @@ export default function EvaluationReport({ evaluation, onBack }) {
             </section>
           )}
 
-          <section className="p-5 bg-brand-50 rounded-xl border border-brand-100">
-            <h3 className="font-semibold text-brand-900 mb-2">Next Steps</h3>
-            <ol className="list-decimal list-inside text-sm text-brand-800 space-y-1">
+          <section className="p-5 bg-indigo-50 rounded-xl border border-indigo-100">
+            <h3 className="font-semibold text-indigo-900 mb-2">Next Steps</h3>
+            <ol className="list-decimal list-inside text-sm text-indigo-800 space-y-1">
               {feedback.next_steps?.map((step, i) => (
                 <li key={i}>{step}</li>
               ))}
