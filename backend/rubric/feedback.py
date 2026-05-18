@@ -21,7 +21,7 @@ class FeedbackGenerator:
     def generate_feedback(
         self, rubric: RubricSchema, conversation_history: list[dict]
     ) -> dict:
-        if settings.anthropic_api_key:
+        if settings.anthropic_configured:
             result = self._llm_feedback(rubric, conversation_history)
             if result:
                 return result

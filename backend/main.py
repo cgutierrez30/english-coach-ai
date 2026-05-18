@@ -8,13 +8,18 @@ from openai import OpenAI
 from api.evaluation import router as evaluation_router
 from api.progress import router as progress_router
 from api.sessions import router as sessions_router
-from config import settings
+from config import ROOT_DIR, settings
 from database import init_db
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
+    if not settings.anthropic_configured:
+        print(
+            "WARNING: ANTHROPIC_API_KEY not set — using heuristic scoring. "
+            f"Add your key to: {ROOT_DIR / '.env'}"
+        )
     yield
 
 
@@ -40,7 +45,11 @@ app.include_router(progress_router)
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {
+        "status": "ok",
+        "anthropic_configured": settings.anthropic_configured,
+        "openai_configured": bool(settings.openai_api_key.strip()),
+    }
 
 
 @app.post("/transcribe")

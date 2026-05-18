@@ -25,7 +25,7 @@ class RubricEvaluator:
         )
         rubric = RubricSchema.empty(weights=weights)
 
-        if not settings.anthropic_api_key:
+        if not settings.anthropic_configured:
             return self._heuristic_evaluate(conversation_history, rubric)
 
         history_text = self._format_history(conversation_history)

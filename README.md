@@ -62,8 +62,9 @@ python -m venv .venv
 source .venv/bin/activate
 
 pip install -r requirements.txt
-cp ../.env.example ../.env
-# Edit .env with your keys
+# From project root (english-coach-ai/), not backend/
+copy ..\.env.example ..\.env
+# Edit english-coach-ai\.env — set ANTHROPIC_API_KEY from console.anthropic.com
 
 uvicorn main:app --reload --port 8000
 ```

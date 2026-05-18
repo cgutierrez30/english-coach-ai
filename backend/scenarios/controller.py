@@ -64,7 +64,7 @@ Conversation:
 Respond with ONLY valid JSON:
 {{"all_goals_met": true or false, "completed_goals": ["list of met goals"], "remaining_goals": ["list of unmet goals"]}}"""
 
-        if not settings.anthropic_api_key:
+        if not settings.anthropic_configured:
             return self._heuristic_goal_check(conversation_history, goals)
 
         try:
@@ -96,7 +96,7 @@ Respond with ONLY valid JSON:
         if not conversation_history:
             return self.scenario.get("opening_line", "Hello! How can I help you?")
 
-        if not settings.anthropic_api_key:
+        if not settings.anthropic_configured:
             return self._fallback_response(conversation_history)
 
         messages = [{"role": "user", "content": self.get_system_prompt()}]
