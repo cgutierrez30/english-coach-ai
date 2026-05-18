@@ -55,7 +55,8 @@ export function getDimensionAccent(name) {
 }
 
 export function formatJustification(text) {
-  if (!text || /heuristic score/i.test(text)) {
+  if (!text) return "Based on your conversation.";
+  if (/heuristic score \(no api key\)/i.test(text)) {
     return "Based on your conversation.";
   }
   return text;
