@@ -1,0 +1,21 @@
+{
+  "id": "order_food",
+  "title": "Ordering Food at a Restaurant",
+  "description": "Practice ordering a meal at a casual American diner, including drinks, a main dish, and handling questions from the server.",
+  "difficulty": "beginner",
+  "context": "You are at a diner in the US. It is lunchtime and you are hungry. The server greets you at your table. You need to order something to eat and drink, and respond naturally when the server asks follow-up questions.",
+  "opening_line": "Hi there! Welcome in. Can I start you off with something to drink?",
+  "goal_state": [
+    "user has greeted the server",
+    "user has ordered a main dish",
+    "user has asked about or ordered a drink",
+    "user has handled at least one clarifying question from the server"
+  ],
+  "success_criteria": "User successfully completes a restaurant order interaction",
+  "rubric_weights": {
+    "task_completion": 0.4,
+    "communicative_appropriateness": 0.3,
+    "fluency": 0.2,
+    "vocabulary_range": 0.1
+  }
+}

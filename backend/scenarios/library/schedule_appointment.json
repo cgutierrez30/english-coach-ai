@@ -1,0 +1,22 @@
+{
+  "id": "schedule_appointment",
+  "title": "Scheduling a Doctor's Appointment",
+  "description": "Practice calling a medical clinic to schedule an appointment, provide basic information, and confirm details.",
+  "difficulty": "intermediate",
+  "context": "You need to schedule a routine check-up at a local clinic. You are calling during business hours. The receptionist will ask for your name, reason for visit, and preferred dates or times.",
+  "opening_line": "Thank you for calling Westside Family Clinic. This is Jamie at the front desk. How can I assist you today?",
+  "goal_state": [
+    "user has stated they want to schedule an appointment",
+    "user has provided their name when asked",
+    "user has described the reason for the visit",
+    "user has discussed or confirmed a date or time preference",
+    "user has confirmed understanding of next steps before ending the call"
+  ],
+  "success_criteria": "User successfully schedules or initiates scheduling of a medical appointment",
+  "rubric_weights": {
+    "task_completion": 0.4,
+    "communicative_appropriateness": 0.3,
+    "fluency": 0.2,
+    "vocabulary_range": 0.1
+  }
+}

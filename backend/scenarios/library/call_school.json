@@ -1,0 +1,22 @@
+{
+  "id": "call_school",
+  "title": "Calling Your Child's School",
+  "description": "Practice calling a school office to report an absence, ask a question, or speak with staff in a polite, clear way.",
+  "difficulty": "intermediate",
+  "context": "You are a parent calling your child's elementary school during office hours. You need to report that your child will be absent today and ask whether any homework can be sent home. The school receptionist answers the phone.",
+  "opening_line": "Good morning, Lincoln Elementary School, this is Ms. Rivera speaking. How may I help you?",
+  "goal_state": [
+    "user has identified themselves and their child",
+    "user has stated the reason for calling",
+    "user has reported the absence with a brief reason",
+    "user has asked at least one follow-up question",
+    "user has closed the call politely"
+  ],
+  "success_criteria": "User completes a clear, polite school office phone call about an absence",
+  "rubric_weights": {
+    "task_completion": 0.4,
+    "communicative_appropriateness": 0.35,
+    "fluency": 0.15,
+    "vocabulary_range": 0.1
+  }
+}
