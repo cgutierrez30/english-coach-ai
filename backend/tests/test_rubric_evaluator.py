@@ -40,7 +40,7 @@ def test_rubric_to_dict_has_four_dimensions():
 
 
 def test_heuristic_evaluate_without_api_key(evaluator, monkeypatch):
-    monkeypatch.setattr("rubric.evaluator.settings.anthropic_api_key", "")
+    monkeypatch.setattr("rubric.evaluator.settings.anthropic_api_key", "your_key_here")
     history = [
         {"role": "user", "content": "Hello, I would like a burger and fries please."},
         {"role": "assistant", "content": "Sure!"},
@@ -49,3 +49,23 @@ def test_heuristic_evaluate_without_api_key(evaluator, monkeypatch):
     result = evaluator.evaluate(history, SAMPLE_SCENARIO)
     assert result.overall_score >= 2.0
     assert all(1 <= d.score <= 5 for d in result.dimensions)
+    scores = [d.score for d in result.dimensions]
+    assert "heuristic" not in result.dimensions[0].justification.lower()
+
+
+def test_heuristic_scores_can_differ(evaluator, monkeypatch):
+    monkeypatch.setattr("rubric.evaluator.settings.anthropic_api_key", "your_key_here")
+    history = [
+        {
+            "role": "user",
+            "content": "Good morning! Please may I order the soup and salad? Thank you very much.",
+        },
+        {"role": "assistant", "content": "Of course."},
+        {
+            "role": "user",
+            "content": "Could I also have water? That is everything. Thanks again!",
+        },
+    ]
+    result = evaluator.evaluate(history, SAMPLE_SCENARIO)
+    scores = [d.score for d in result.dimensions]
+    assert max(scores) >= min(scores)

@@ -24,7 +24,7 @@ def test_list_scenarios(client):
     res = client.get("/scenarios")
     assert res.status_code == 200
     data = res.json()
-    assert len(data) == 3
+    assert len(data) == 6
     ids = {s["id"] for s in data}
     assert "order_food" in ids
 
